@@ -26,9 +26,23 @@
 
     function llArrayToObject(lla) {
         return {
-            lat: lla[0],
-            lng: lla[1]
+            lat: limit(lla[0], -90, 90),
+            lng: wrap(lla[1], -180, 180)
         };
+    }
+
+    function wrap(i, l, h) {
+        var r = h - l;
+        var i = i - l;
+        while(i > r) i -= r;
+        while(i < 0) i += r;
+        return i + l;
+    }
+
+    function limit(i, l, h) {
+        if(i > h) return h;
+        if(i < l) return l;
+        return i;
     }
 
     var precision = 6; // module-wide precision for decimal output
@@ -80,7 +94,7 @@
          */
         destination: function(c, b, d) {
             if(isArray(c)) c = llArrayToObject(c);
-            b = deg2rad(b);
+            b = deg2rad(wrap(b, 0, 360));
 
             var a = d / R;
             var lat = Math.asin( Math.sin(c.lat) * Math.cos(a) + Math.cos(c.lat) * Math.sin(a) * Math.cos(b) );
