@@ -2,6 +2,9 @@
  * Exports object containing utility functions for handling points and
  * distances on a sphere
  *
+ * Special help with formulas from
+ * http://www.movable-type.co.uk/scripts/latlong.html
+ *
  * @module traveler
  */
 (function(name, context, definition) {
