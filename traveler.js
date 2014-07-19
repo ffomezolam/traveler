@@ -17,17 +17,18 @@
         return d * (Math.PI / 180);
     }
 
-    // utility function to get latLng points from various types of arguments
-    function latLngArgs(np) {
-        var as = Array.prototype.slice.call(arguments, 1); // turn arguments into array
-        var i = 0,
-            t = 0;  // 0 = lat, 1 = lng
-        while(i < as.length) {
-            var a = as[i];
-
-        }
+    function rad2deg(r) {
+        return r * (180 / Math.PI);
     }
 
+    function llArrayToObject(lla) {
+        return {
+            lat: lla[0],
+            lng: lla[1]
+        };
+    }
+
+    var precision = 6; // module-wide precision for decimal output
     var R = 6371; // Earth's radius in km
 
     /**
@@ -48,6 +49,9 @@
          * @return {Number} Distance (km)
          */
         distance: function(c1, c2) {
+            if(isArray(c1)) c1 = llArrayToObject(c1);
+            if(isArray(c2)) c2 = llArrayToObject(c2);
+
             var lat1 = deg2rad(c1.lat),
                 lat2 = deg2rad(c2.lat),
                 diflat = deg2rad(c2.lat - c1.lat),
@@ -56,10 +60,33 @@
             var sinlat = Math.sin(diflat / 2),
                 sinlng = Math.sin(diflng / 2);
 
-            var a = sinlat * sinlat + Math.cos(lat1) * Math.cos(lat2) + sinlng * sinlng;
+            var a = sinlat * sinlat + Math.cos(lat1) * Math.cos(lat2) * sinlng * sinlng;
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-            return R * c;
+            return parseFloat((R * c).toFixed(precision));
+        },
+
+        /**
+         * Get point at distance and bearing from given points
+         *
+         * @method destination
+         * @param {Object} c Starting coordinate
+         * @param {Number} b Bearing (degrees)
+         * @param {Number} d Distance (km)
+         * @return {Object} Destination point
+         */
+        destination: function(c, b, d) {
+            if(isArray(c)) c = llArrayToObject(c);
+            b = deg2rad(b);
+
+            var a = d / R;
+            var lat = Math.asin( Math.sin(c.lat) * Math.cos(a) + Math.cos(c.lat) * Math.sin(a) * Math.cos(b) );
+            var lng = c.lng + Math.atan2( Math.sin(b) * Math.sin(a) * Math.cos(c.lat),
+                                          Math.cos(a) - Math.sin(c.lat) * Math.sin(lat) );
+            return {
+                lat: parseFloat(rad2deg(lat).toFixed(precision)),
+                lng: parseFloat(rad2deg(lng).toFixed(precision))
+            };
         }
     };
 
