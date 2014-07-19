@@ -24,11 +24,21 @@
         return r * (180 / Math.PI);
     }
 
-    function llArrayToObject(lla) {
-        return {
-            lat: limit(lla[0], -90, 90),
-            lng: wrap(lla[1], -180, 180)
-        };
+    function processCoordinate(a) {
+        var out = {};
+
+        if(isArray(a)) {
+            out.lat = a[0];
+            out.lng = a[1];
+        } else if(typeof a == 'object') {
+            out.lat = a.lat;
+            out.lng = a.lng;
+        }
+
+        out.lat = limit(out.lat, -90, 90);
+        out.lng = limit(out.lng, -180, 180);
+
+        return out;
     }
 
     function wrap(i, l, h) {
@@ -66,11 +76,11 @@
          * @return {Number} Distance (km)
          */
         distance: function(c1, c2) {
-            if(isArray(c1)) c1 = llArrayToObject(c1);
-            if(isArray(c2)) c2 = llArrayToObject(c2);
+            c1 = processCoordinate(c1);
+            c2 = processCoordinate(c2);
 
-            var lat1 = deg2rad(c1.lat),
-                lat2 = deg2rad(c2.lat),
+            var lat1 = deg2rad(c1.lat);
+                lat2 = deg2rad(c2.lat);
                 diflat = deg2rad(c2.lat - c1.lat),
                 diflng = deg2rad(c2.lng - c1.lng);
 
@@ -93,13 +103,18 @@
          * @return {Object} Destination point
          */
         destination: function(c, b, d) {
-            if(isArray(c)) c = llArrayToObject(c);
+            console.log('-------------');
+            c = processCoordinate(c);
             b = deg2rad(wrap(b, 0, 360));
 
-            var a = d / R;
-            var lat = Math.asin( Math.sin(c.lat) * Math.cos(a) + Math.cos(c.lat) * Math.sin(a) * Math.cos(b) );
-            var lng = c.lng + Math.atan2( Math.sin(b) * Math.sin(a) * Math.cos(c.lat),
-                                          Math.cos(a) - Math.sin(c.lat) * Math.sin(lat) );
+            var inlat = deg2rad(c.lat),
+                inlng = deg2rad(c.lng),
+                a = d / R;
+
+            var lat = Math.asin( Math.sin(inlat) * Math.cos(a) + Math.cos(inlat) * Math.sin(a) * Math.cos(b) );
+            var lng = inlng + Math.atan2( Math.sin(b) * Math.sin(a) * Math.cos(inlat),
+                                          Math.cos(a) - (Math.sin(inlat) * Math.sin(lat)) );
+            console.log(lat, lng);
             return {
                 lat: parseFloat(rad2deg(lat).toFixed(precision)),
                 lng: parseFloat(rad2deg(lng).toFixed(precision))
