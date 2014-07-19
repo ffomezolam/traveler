@@ -103,7 +103,6 @@
          * @return {Object} Destination point
          */
         destination: function(c, b, d) {
-            console.log('-------------');
             c = processCoordinate(c);
             b = deg2rad(wrap(b, 0, 360));
 
@@ -114,7 +113,6 @@
             var lat = Math.asin( Math.sin(inlat) * Math.cos(a) + Math.cos(inlat) * Math.sin(a) * Math.cos(b) );
             var lng = inlng + Math.atan2( Math.sin(b) * Math.sin(a) * Math.cos(inlat),
                                           Math.cos(a) - (Math.sin(inlat) * Math.sin(lat)) );
-            console.log(lat, lng);
             return {
                 lat: parseFloat(rad2deg(lat).toFixed(precision)),
                 lng: parseFloat(rad2deg(lng).toFixed(precision))
